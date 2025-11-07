@@ -1,0 +1,61 @@
+@model ExpenseTracker.Models.Category
+
+@{
+    ViewData["Title"] = "Create Category";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-plus me-2"></i>Create New Category</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Title" class="form-label">Title</label>
+                                <input asp-for="Title" class="form-control" placeholder="Enter category title" />
+                                <span asp-validation-for="Title" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Type" class="form-label">Type</label>
+                                <select asp-for="Type" class="form-select">
+                                    <option value="">Select Type</option>
+                                    <option value="Income">Income</option>
+                                    <option value="Expense">Expense</option>
+                                </select>
+                                <span asp-validation-for="Type" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="Icon" class="form-label">Icon (Emoji)</label>
+                        <input asp-for="Icon" class="form-control" placeholder="Enter an emoji (e.g., 🍽️, 🚗, 💼)" maxlength="5" />
+                        <div class="form-text">Choose an emoji to represent this category. Common examples: 🍽️ (Food), 🚗 (Transport), 💼 (Salary), 🏠 (Home)</div>
+                        <span asp-validation-for="Icon" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-arrow-left me-2"></i>Back to List
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Create Category
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

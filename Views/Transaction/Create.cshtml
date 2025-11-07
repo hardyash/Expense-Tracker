@@ -1,0 +1,77 @@
+@model ExpenseTracker.Models.Transaction
+
+@{
+    ViewData["Title"] = "Create Transaction";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-plus me-2"></i>Add New Transaction</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="CategoryId" class="form-label">Category</label>
+                                <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId">
+                                    <option value="">Select Category</option>
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Date" class="form-label">Date</label>
+                                <input asp-for="Date" class="form-control" type="date" />
+                                <span asp-validation-for="Date" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="Amount" class="form-label">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input asp-for="Amount" class="form-control" placeholder="0.00" step="0.01" />
+                        </div>
+                        <span asp-validation-for="Amount" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="Note" class="form-label">Note (Optional)</label>
+                        <textarea asp-for="Note" class="form-control" rows="3" placeholder="Add a note about this transaction..."></textarea>
+                        <span asp-validation-for="Note" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-arrow-left me-2"></i>Back to List
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Add Transaction
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Set today's date as default
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.querySelector('input[type="date"]');
+            if (dateInput && !dateInput.value) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.value = today;
+            }
+        });
+    </script>
+}

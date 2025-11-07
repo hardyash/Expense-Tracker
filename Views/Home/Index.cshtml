@@ -1,0 +1,248 @@
+﻿@{
+    ViewData["Title"] = "Expense Tracker Dashboard";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 mb-4">📊 Expense Tracker Dashboard</h1>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Total Income</h6>
+                            <h3>@ViewBag.TotalIncome.ToString("C")</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-arrow-up fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Total Expenses</h6>
+                            <h3>@ViewBag.TotalExpense.ToString("C")</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-arrow-down fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card @(ViewBag.Balance >= 0 ? "bg-info" : "bg-warning") text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Balance</h6>
+                            <h3>@ViewBag.Balance.ToString("C")</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas @(ViewBag.Balance >= 0 ? "fa-wallet" : "fa-exclamation-triangle") fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Expense Categories -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">💰 Expense Categories (This Month)</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.ExpensesByCategory != null && ((IEnumerable<dynamic>)ViewBag.ExpensesByCategory).Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var item in (IEnumerable<dynamic>)ViewBag.ExpensesByCategory)
+                            {
+                                var percentage = ViewBag.TotalExpense > 0 ? (item.Total / ViewBag.TotalExpense * 100) : 0;
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge badge-primary badge-pill me-2">@item.Category.Icon</span>
+                                        <strong>@item.Category.Title</strong>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="h6">@item.Total.ToString("C")</span>
+                                        <br>
+                                        <small class="text-muted">@percentage.ToString("F1")%</small>
+                                    </div>
+                                </div>
+                                <div class="progress mb-2" style="height: 8px;">
+                                    <div class="progress-bar" role="progressbar" style="width: @percentage%"
+                                        aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted">
+                            <i class="fas fa-chart-pie fa-3x mb-3"></i>
+                            <p>No expenses recorded this month</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- All Categories -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">📂 All Categories</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Categories != null && ((IEnumerable<dynamic>)ViewBag.Categories).Any())
+                    {
+                        <div class="row">
+                            @foreach (var category in (IEnumerable<dynamic>)ViewBag.Categories)
+                            {
+                                <div class="col-sm-6 mb-3">
+                                    <div class="card @(category.Type == "Income" ? "border-success" : "border-danger") h-100">
+                                        <div class="card-body text-center">
+                                            <div class="mb-2">
+                                                <span style="font-size: 2rem;">@category.Icon</span>
+                                            </div>
+                                            <h6 class="card-title">@category.Title</h6>
+                                            <span class="badge @(category.Type == "Income" ? "badge-success" : "badge-danger")">
+                                                @category.Type
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted">
+                            <i class="fas fa-folder-open fa-3x mb-3"></i>
+                            <p>No categories available</p>
+                            <a href="#" class="btn btn-primary">Add Category</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">🕐 Recent Transactions</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.RecentTransactions != null && ((IEnumerable<dynamic>)ViewBag.RecentTransactions).Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Category</th>
+                                        <th>Note</th>
+                                        <th class="text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaction in (IEnumerable<dynamic>)ViewBag.RecentTransactions)
+                                    {
+                                        <tr>
+                                            <td>@transaction.Date.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <span class="badge badge-primary me-1">@transaction.Category.Icon</span>
+                                                @transaction.Category.Title
+                                            </td>
+                                            <td>@transaction.Note</td>
+                                            <td class="text-end">
+                                                <span
+                                                    class="@(transaction.Category.Type == "Income" ? "text-success" : "text-danger")">
+                                                    @(transaction.Category.Type == "Income" ? "+" :
+                                                                                                "-")@transaction.Amount.ToString("C")
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted">
+                            <i class="fas fa-receipt fa-3x mb-3"></i>
+                            <p>No recent transactions</p>
+                            <a href="#" class="btn btn-primary">Add Transaction</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">⚡ Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3">
+                            <a asp-controller="Transaction" asp-action="Create" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="fas fa-plus-circle fa-2x d-block mb-2"></i>
+                                Add Transaction
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a asp-controller="Category" asp-action="Create" class="btn btn-outline-success btn-lg w-100">
+                                <i class="fas fa-folder-plus fa-2x d-block mb-2"></i>
+                                Add Category
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a asp-controller="Reports" asp-action="Index" class="btn btn-outline-info btn-lg w-100">
+                                <i class="fas fa-chart-line fa-2x d-block mb-2"></i>
+                                View Reports
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-warning btn-lg w-100 dropdown-toggle" type="button" id="settingsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-cog fa-2x d-block mb-2"></i>
+                                    Manage Data
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Transaction" asp-action="Index"><i class="fas fa-receipt me-2"></i>All Transactions</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Category" asp-action="Index"><i class="fas fa-folder me-2"></i>All Categories</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-controller="Reports" asp-action="Monthly"><i class="fas fa-calendar-alt me-2"></i>Monthly Reports</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Reports" asp-action="Yearly"><i class="fas fa-calendar me-2"></i>Yearly Reports</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

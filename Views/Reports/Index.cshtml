@@ -1,0 +1,302 @@
+@{
+    ViewData["Title"] = "Reports Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-chart-line me-2"></i>Reports Dashboard</h2>
+    <div class="btn-group" role="group">
+        <a asp-action="Monthly" class="btn btn-outline-primary">Monthly Report</a>
+        <a asp-action="Yearly" class="btn btn-outline-primary">Yearly Report</a>
+    </div>
+</div>
+
+<!-- Summary Cards for Current Month -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">@ViewBag.CurrentMonth Income</h6>
+                        <h3>@ViewBag.TotalIncome.ToString("C")</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-arrow-up fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">@ViewBag.CurrentMonth Expenses</h6>
+                        <h3>@ViewBag.TotalExpense.ToString("C")</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-arrow-down fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card @(ViewBag.Balance >= 0 ? "bg-info" : "bg-warning") text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Net Balance</h6>
+                        <h3>@ViewBag.Balance.ToString("C")</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas @(ViewBag.Balance >= 0 ? "fa-wallet" : "fa-exclamation-triangle") fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <!-- Expense Breakdown -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">💸 Expense Breakdown (@ViewBag.CurrentMonth)</h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.ExpensesByCategory != null && ((IEnumerable<dynamic>)ViewBag.ExpensesByCategory).Any())
+                {
+                    <canvas id="expenseChart" width="400" height="400"></canvas>
+                    <div class="mt-3">
+                        @foreach (var item in (IEnumerable<dynamic>)ViewBag.ExpensesByCategory)
+                        {
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="badge bg-primary me-2">@item.Category.Icon</span>
+                                    <strong>@item.Category.Title</strong>
+                                </div>
+                                <div class="text-end">
+                                    <span class="h6">@item.Total.ToString("C")</span>
+                                    <br>
+                                    <small class="text-muted">@item.Percentage.ToString("F1")%</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-chart-pie fa-3x mb-3"></i>
+                        <p>No expenses data available</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Income Breakdown -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">💰 Income Breakdown (@ViewBag.CurrentMonth)</h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.IncomeByCategory != null && ((IEnumerable<dynamic>)ViewBag.IncomeByCategory).Any())
+                {
+                    <canvas id="incomeChart" width="400" height="400"></canvas>
+                    <div class="mt-3">
+                        @foreach (var item in (IEnumerable<dynamic>)ViewBag.IncomeByCategory)
+                        {
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="badge bg-success me-2">@item.Category.Icon</span>
+                                    <strong>@item.Category.Title</strong>
+                                </div>
+                                <div class="text-end">
+                                    <span class="h6">@item.Total.ToString("C")</span>
+                                    <br>
+                                    <small class="text-muted">@item.Percentage.ToString("F1")%</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-chart-pie fa-3x mb-3"></i>
+                        <p>No income data available</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Comparison -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">📈 6-Month Comparison</h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.MonthlyComparison != null)
+                {
+                    <canvas id="monthlyChart" width="400" height="200"></canvas>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th class="text-end">Income</th>
+                                    <th class="text-end">Expense</th>
+                                    <th class="text-end">Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in (IEnumerable<dynamic>)ViewBag.MonthlyComparison)
+                                {
+                                    <tr>
+                                        <td>@item.Month</td>
+                                        <td class="text-end text-success">@item.Income.ToString("C")</td>
+                                        <td class="text-end text-danger">@item.Expense.ToString("C")</td>
+                                        <td class="text-end @(item.Balance >= 0 ? "text-success" : "text-danger")">
+                                            @item.Balance.ToString("C")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-chart-line fa-3x mb-3"></i>
+                        <p>No comparison data available</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Expense Pie Chart
+        @if (ViewBag.ExpensesByCategory != null && ((IEnumerable<dynamic>)ViewBag.ExpensesByCategory).Any())
+        {
+            <text>
+            const expenseCtx = document.getElementById('expenseChart').getContext('2d');
+            new Chart(expenseCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", ((IEnumerable<dynamic>)ViewBag.ExpensesByCategory).Select(x => "'" + x.Category.Title + "'")))],
+                    datasets: [{
+                        data: [@Html.Raw(string.Join(",", ((IEnumerable<dynamic>)ViewBag.ExpensesByCategory).Select(x => x.Total.ToString())))],
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                            '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            </text>
+        }
+
+        // Income Pie Chart
+        @if (ViewBag.IncomeByCategory != null && ((IEnumerable<dynamic>)ViewBag.IncomeByCategory).Any())
+        {
+            <text>
+            const incomeCtx = document.getElementById('incomeChart').getContext('2d');
+            new Chart(incomeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", ((IEnumerable<dynamic>)ViewBag.IncomeByCategory).Select(x => "'" + x.Category.Title + "'")))],
+                    datasets: [{
+                        data: [@Html.Raw(string.Join(",", ((IEnumerable<dynamic>)ViewBag.IncomeByCategory).Select(x => x.Total.ToString())))],
+                        backgroundColor: [
+                            '#28a745', '#20c997', '#17a2b8', '#6f42c1', '#e83e8c',
+                            '#fd7e14', '#ffc107', '#28a745', '#6c757d', '#007bff'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            </text>
+        }
+
+        // Monthly Comparison Chart
+        @if (ViewBag.MonthlyComparison != null)
+        {
+            <text>
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(monthlyCtx, {
+                type: 'line',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", ((IEnumerable<dynamic>)ViewBag.MonthlyComparison).Select(x => "'" + x.Month + "'")))],
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: [@Html.Raw(string.Join(",", ((IEnumerable<dynamic>)ViewBag.MonthlyComparison).Select(x => x.Income.ToString())))],
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Expense',
+                            data: [@Html.Raw(string.Join(",", ((IEnumerable<dynamic>)ViewBag.MonthlyComparison).Select(x => x.Expense.ToString())))],
+                            borderColor: '#dc3545',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            </text>
+        }
+    </script>
+}
